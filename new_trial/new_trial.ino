@@ -34,31 +34,104 @@ CRGB leds[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 int rain_array1[NUM_LEDS];
 int rain_array2[NUM_LEDS];
-
+int patternMode =0;
+int patternMode2 = 0;
+int illusion = 0;
 //CRGB LEDS[TotalLeds];
 uint8_t paletteIndex = 0;
 
-CRGBPalette16 purplePalette = CRGBPalette16 (
-    CRGB::DarkViolet,
-    CRGB::DarkViolet,
-    CRGB::DarkViolet,
-    CRGB::DarkViolet,
-    
-    CRGB::Magenta,
-    CRGB::Magenta,
-    CRGB::Linen,
-    CRGB::Linen,
-    
-    CRGB::Magenta,
-    CRGB::Magenta,
-    CRGB::DarkViolet,
-    CRGB::DarkViolet,
 
-    CRGB::DarkViolet,
-    CRGB::DarkViolet,
-    CRGB::Linen,
-    CRGB::Linen
-);
+// Palettes!!
+
+DEFINE_GRADIENT_PALETTE (heatmap_gp) {
+    0,   0,   0,   0,   //black
+  128, 255,   0,   0,   //red
+  200, 255, 255,   0,   //bright yellow
+  255, 255, 255, 255    //full white 
+};
+
+DEFINE_GRADIENT_PALETTE( rainbow_gp ) {
+    0, 126,  1,142,
+   25, 171,  1, 26,
+   48, 224,  9,  1,
+   71, 237,138,  1,
+   94,  52,173,  1,
+  117,   1,201,  1,
+  140,   1,211, 54,
+  163,   1,124,168,
+  186,   1,  8,149,
+  209,  12,  1,151,
+  232,  12,  1,151,
+  255, 171,  1,190};
+
+
+DEFINE_GRADIENT_PALETTE( purplefly_gp ) {
+    0,   0,  0,  0,
+   63, 239,  0,122,
+  191, 252,255, 78,
+  255,   0,  0,  0};
+
+
+DEFINE_GRADIENT_PALETTE( bhw2_39_gp ) {
+    0,   2,184,188,
+   33,  56, 27,162,
+   66,  56, 27,162,
+  122, 255,255, 45,
+  150, 227, 65,  6,
+  201,  67, 13, 27,
+  255,  16,  1, 53};
+
+DEFINE_GRADIENT_PALETTE( bhw1_01_gp ) {
+    0, 227,101,  3,
+  117, 194, 18, 19,
+  255,  92,  8,192};
+
+
+DEFINE_GRADIENT_PALETTE( teabearrose_gp ) {
+    0, 107,  1,  5,
+   25, 165, 25, 45,
+   38, 184, 82, 88,
+   63, 229,133,130,
+   89, 229,133,130,
+  109, 186, 40,  4,
+  117, 215,139, 96,
+  122, 148,  8,  1,
+  127, 215,139, 96,
+  132, 148,  8,  1,
+  137, 215,139, 96,
+  145, 186, 40,  4,
+  165, 229,133,130,
+  191, 229,133,130,
+  216, 184, 82, 88,
+  229, 165, 25, 45,
+  255, 107,  1,  5};
+
+
+DEFINE_GRADIENT_PALETTE( Need_I_Say_More_gp ) {
+    0, 224, 49, 13,
+   42, 224, 49, 13,
+   84, 232, 73, 22,
+   99, 239,103, 34,
+  114, 234,136, 50,
+  126, 229,176, 68,
+  137, 144,159, 75,
+  153,  82,142, 83,
+  168,  48,127, 85,
+  211,  25,111, 89,
+  255,  25,111, 89};
+
+
+
+CRGBPalette16 myPal = heatmap_gp;
+CRGBPalette16 myPal2 = rainbow_gp;
+CRGBPalette16 myPal3 = purplefly_gp;
+CRGBPalette16 myPal4 = bhw2_39_gp;
+CRGBPalette16 myPal5 = bhw1_01_gp;
+CRGBPalette16 myPal6 = teabearrose_gp;
+CRGBPalette16 myPal7 = Need_I_Say_More_gp;
+
+
+CRGBPalette16 palletes[] = {myPal,myPal2,myPal3,myPal4,myPal5,myPal6,myPal7};
 
 
 void setup() { 
@@ -85,20 +158,27 @@ void setup() {
 
 
 void loop() {
-
   scale.set_scale(calibration_factor); //Adjust to this calibration factor
   Serial.print("Reading:");
   float force = scale.get_units();
   Serial.print("\n");
   Serial.print(scale.get_units(), 1);
   if (scale.get_units() > 10){
-    for(int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CRGB (255,0,0);
-      leds2[i] = CRGB (255,0,0);
+    patternMode = rand()%7;
+    patternMode2 = rand()%7;
+    for(uint8_t i = 0; i < NUM_LEDS; i++) {
+      leds[i] = ColorFromPalette(palletes[patternMode], i*2.5);
+      leds2[i] = ColorFromPalette(palletes[patternMode2], i*2.5);
       FastLED.show();
       delay(30);
     }
+    //patternMode++; 
+    //if (patternMode > 7){
+    //  patternMode = 0;
+    //  }
   }
+
+
   EVERY_N_MILLISECONDS(60000){
     speed = 12;
   }
