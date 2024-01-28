@@ -170,13 +170,13 @@ void loop() {
   if (scale.get_units() > 10){
     switch (patternCounter){
       case 0:
-        sineWave();
+        //sineWave();
+        shiftingColoursDown();
         break;
       case 1:
         //downwardMovement();
         //paletteFill();
-        //shiftingColoursDown();
-        sineWave();
+        shiftingColoursDown();
         break;
       case 2:
         upwardMovement();
@@ -193,11 +193,13 @@ void loop() {
       case 6:
         shiftingColoursDown();
         break;
+      case 7:
+        dotMoving();
+        break;
 
       //case 2: 
       //  lightsFlickering();
       //  break;
-
     }
     nextPattern();
   }
@@ -289,7 +291,7 @@ uint8_t wsawPos9 = map(255 - beat8(speed, speed * 4500 + spacing * 0.45), 0, 255
 
 /// Patterns
 void nextPattern() {
-  patternCounter = (patternCounter + 1) % 7;          // Change the number after the % to the number of patterns you have
+  patternCounter = (patternCounter + 1) % 8;          // Change the number after the % to the number of patterns you have
 }
 void upwardMovement(){
     patternMode = rand()%7;
@@ -398,13 +400,47 @@ void drawMovingPixel() {
 
 void sineWave(){
   for (int i = 0; i < NUM_LEDS*2; i++){
-    uint16_t sinBeat = beatsin16(30, 0, NUM_LEDS - 1, 0, 0);
+    fill_solid(leds, NUM_LEDS, CRGB(0,40,40));
+    fill_solid(leds2, NUM_LEDS, CRGB(0,40,40));
+    uint16_t sinBeat = beatsin16(10, 0, NUM_LEDS - 1, 0, 0);
 
-    leds[sinBeat] = CRGB::Blue;
+    leds[sinBeat] = CRGB::Purple;
+    leds[sinBeat+1] = CRGB::Purple;
+    leds[sinBeat+2] = CRGB::Purple;
+    leds2[sinBeat] = CRGB::Purple;
+    leds[sinBeat+1] = CRGB::Purple;
+    leds2[sinBeat+2] = CRGB::Purple;
   
     fadeToBlackBy(leds, NUM_LEDS, 10);
+    fadeToBlackBy(leds2, NUM_LEDS, 10);
+    FastLED.show();
+    delay(20);
   }
-  FastLED.show();
-  delay(20);
 }
+
+/*
+void halfSineWave(){
+  for (int i = 0; i < NUM_LEDS*2; i++){
+    fill_solid(leds, NUM_LEDS, CRGB(0,40,40));
+    fill_solid(leds2, NUM_LEDS, CRGB(0,40,40));
+    uint16_t sinBeat = beatsin8(10, 0, 50, 0, 0);
+    uint16_t cosBeat2 = beatcos8(10, 50, NUM_LEDS-1, 0, 0);
+    leds[sinBeat] = CRGB::Purple;
+    leds2[cosBeat2]= CRGB::Purple;
+    leds[sinBeat] = CRGB::Purple;
+    leds[constrain(sinBeat+1,0,50)] = CRGB::Purple;
+    leds[constrain(sinBeat2+50,50,99)] = CRGB::Purple;
+    leds[constrain(sinBeat2+51,50,99)] = CRGB::Purple;
+    leds2[sinBeat] = CRGB::Purple;
+    leds2[constrain(sinBeat+1,0,50)] = CRGB::Purple;
+    leds2[constrain(sinBeat2+50,50,99)] = CRGB::Purple;
+    leds2[constrain(sinBeat2+51,50,99)] = CRGB::Purple;
+  
+    fadeToBlackBy(leds, NUM_LEDS, 10);
+    fadeToBlackBy(leds2, NUM_LEDS, 10);
+    FastLED.show();
+    delay(20);
+  }
+}
+*/
 
