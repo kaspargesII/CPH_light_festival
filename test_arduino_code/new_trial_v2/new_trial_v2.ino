@@ -163,20 +163,48 @@ void setup() {
 
 void loop() {
   scale.set_scale(calibration_factor); //Adjust to this calibration factor
-  Serial.print("Reading:");
-  float force = scale.get_units();
-  Serial.print("\n");
   Serial.print(scale.get_units(), 1);
-  if (scale.get_units() > 10){
+  Serial.print("\n");
+  //Serial.print(scale.read_average());
+  //Serial.print("\n");
+  //Serial.println(scale.get_units());
+  if(Serial.available())
+  {
+    char temp = Serial.read();
+    if(temp == '+' || temp == 'a')
+      calibration_factor += 10;
+    else if(temp == '-' || temp == 'z')
+      calibration_factor -= 10;
+  }
+
+  if ((scale.get_units() > 10) & (scale.get_units() < 150)){
+    // Cue different passive patterns
+      while ((scale.get_units() > 10) & (scale.get_units() < 150)){
+        EVERY_N_MILLISECONDS(2000){
+          patternMode = rand()%7;
+          for(uint8_t i = 0; i < NUM_LEDS; i++) {
+            leds[i] = ColorFromPalette(palletes[patternMode], i*2.5);
+            leds2[i] = ColorFromPalette(palletes[patternMode], i*2.5);
+          }
+          Serial.print(scale.get_units(), 1);
+          Serial.print("\n");
+          FastLED.show();
+        }
+    }
+  }
+
+  if (scale.get_units() > 150){
+    Serial.print(scale.get_units(), 1);
+    Serial.print("\n");
     switch (patternCounter){
       case 0:
-        //sineWave();
-        shiftingColoursDown();
+        sineWave();
+        //shiftingColoursDown();
         break;
-      case 1:
+      /*case 1:
         //downwardMovement();
         //paletteFill();
-        shiftingColoursDown();
+        sineWave();
         break;
       case 2:
         upwardMovement();
@@ -200,6 +228,7 @@ void loop() {
       //case 2: 
       //  lightsFlickering();
       //  break;
+      */
     }
     nextPattern();
   }
@@ -291,7 +320,7 @@ uint8_t wsawPos9 = map(255 - beat8(speed, speed * 4500 + spacing * 0.45), 0, 255
 
 /// Patterns
 void nextPattern() {
-  patternCounter = (patternCounter + 1) % 8;          // Change the number after the % to the number of patterns you have
+  patternCounter = (patternCounter + 1) % 1;          // Change the number after the % to the number of patterns you have
 }
 void upwardMovement(){
     patternMode = rand()%7;
@@ -397,26 +426,30 @@ void drawMovingPixel() {
   leds[pos] = CRGB::Red;
   leds2[pos] = CRGB::Red;
 }
-
+// We can make a different sinewave for every LED strip.
 void sineWave(){
   for (int i = 0; i < NUM_LEDS*2; i++){
-    fill_solid(leds, NUM_LEDS, CRGB(0,40,40));
-    fill_solid(leds2, NUM_LEDS, CRGB(0,40,40));
-    uint16_t sinBeat = beatsin16(10, 0, NUM_LEDS - 1, 0, 0);
+    EVERY_N_MILLISECONDS(1000){
+      //fill_solid(leds, NUM_LEDS, CRGB(0,40,40));
+      //fill_solid(leds2, NUM_LEDS, CRGB(0,40,40));
+      uint16_t sinBeat = beatsin16(10, 0, NUM_LEDS - 1, 0, 0);
 
-    leds[sinBeat] = CRGB::Purple;
-    leds[sinBeat+1] = CRGB::Purple;
-    leds[sinBeat+2] = CRGB::Purple;
-    leds2[sinBeat] = CRGB::Purple;
-    leds[sinBeat+1] = CRGB::Purple;
-    leds2[sinBeat+2] = CRGB::Purple;
-  
-    fadeToBlackBy(leds, NUM_LEDS, 10);
-    fadeToBlackBy(leds2, NUM_LEDS, 10);
-    FastLED.show();
-    delay(20);
+      leds[constrain(sinBeat,0,99)] = CRGB::Purple;
+      leds[constrain(sinBeat+1,0,99)] = CRGB::Purple;
+      leds[constrain(sinBeat+2,0,99)] = CRGB::Purple;
+      leds2[constrain(sinBeat,0,99)] = CRGB::Purple;
+      leds2[constrain(sinBeat+1,0,99)] = CRGB::Purple;
+      leds2[constrain(sinBeat+2,0,99)] = CRGB::Purple;
+    
+      fadeToBlackBy(leds, NUM_LEDS, 10);
+      fadeToBlackBy(leds2, NUM_LEDS, 10);
+  }FastLED.show();
   }
 }
+
+// Passive patterns
+//void lightsFlickering(){
+//  leds1
 
 /*
 void halfSineWave(){
