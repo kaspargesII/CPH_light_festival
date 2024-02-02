@@ -77,6 +77,7 @@ uint8_t paletteIndex = 0;
 
 uint16_t brightnessScale = 150;
 uint16_t indexScale = 100;
+float force2 = 0;
 // Pattern specific thingy
 CRGB background[NUM_LEDS];
 
@@ -499,6 +500,7 @@ void loop() {
   //scale.set_scale(calibration_factor); //Adjust to this calibration factor
   scale.set_scale(calibration_factor);
   float force = scale.get_units();
+  float force2 = scale.get_units();
   Serial.println("OKAY");
   Serial.println(force);
   //Serial.print(scale.read_average());
@@ -513,7 +515,7 @@ void loop() {
       calibration_factor -= 10;
   }
 
-  if ((force < -10) & (force > -60)){
+  if ((force < -3) & (force > -150)){
     patternMode = rand()%20;
     for(uint8_t i = 0; i < NUM_LEDS; i++) {
       leds[i] = ColorFromPalette(palletes[patternMode], i*2.5);
@@ -531,7 +533,7 @@ void loop() {
       }
     FastLED.show();
     // Cue different passive patterns
-      while ((force < -10) & (force > -60)){
+      while ((force < -10) & (force > -300)){
         Serial.println("standing");
         Serial.println(force);
         Serial.println("\n");
@@ -552,15 +554,14 @@ void loop() {
             leds12[i] = ColorFromPalette(palletes[patternMode], i*2.5);
           }
           FastLED.show();
+          
         }
-    force =  scale.get_units();
-    scale.tare();}
+        force =  scale.get_units(3);
+        force2 =  scale.get_units();
+    }
   }
 
-  if (force < -60){
-    Serial.println("JUMP");
-    Serial.println(force);
-    Serial.println("\n");
+  if ((force-force2 >  5) || (force2-force >  5)){
     switch (patternCounter){
       case 0:
         //randomFlickering();
@@ -568,40 +569,34 @@ void loop() {
         sineWave();
         break;
       case 1:
-        //galaxy();
-        sineWave();
+        galaxy();
         break;
-      /*case 2:
-        cascade();
+      case 2:
+        upwardMovement();
+        //cascade();
         break;
       case 3:
-        towersPulsingPalette();
-        break;
-      case 4:
         towersPulsing();
         break;
-      case 5:
+      case 4:
         randomFlickering();
         break;
-      case 6:
-        sineWave();
-        break;
-      case 7:
+      case 5:
         dotMoving();
         break;
-      case 8:
+      case 6:
         downwardMovement();
         break;
-      case 9:
-        upwardMovement();
-        break;
-      */
+      //case 7:
+      //  towersPulsingPalette();
+      //  break;
       //case 2: 
       //  lightsFlickering();
       //  break;
-    }force = scale.get_units();
+    }
     nextPattern();
-    scale.tare();
+    force = scale.get_units();
+    force2 = 0;
   }
 
   EVERY_N_MILLISECONDS(18000){
@@ -815,7 +810,7 @@ uint8_t qsawPos9 = map(255 - beat8(speed_array[speed_index],  4000 + spacing * 0
 
 /// Patterns
 void nextPattern() {
-  patternCounter = (patternCounter + 1) % 2;          // Change the number after the % to the number of patterns you have
+  patternCounter = (patternCounter + 1) % 7;          // Change the number after the % to the number of patterns you have
 }
 void upwardMovement(){
     patternMode = rand()%20;
@@ -1216,7 +1211,7 @@ void towersPulsingPalette(){
   int num_leds_10 = 57;
   int num_leds_11 = 70;
   int num_leds_12 = 17;
-  for (int i = 0; i < 50; i++){
+  for (int i = 0; i < 30; i++){
     int random_num_1 =  random(-5,5);
     int random_num_2 =  random(-5,5);
     int random_num_3 =  random(-5,5);
@@ -1268,7 +1263,7 @@ void towersPulsingPalette(){
       fadeToBlackBy(leds10, NUM_LEDS, 10);
       fadeToBlackBy(leds11, NUM_LEDS, 10);
       fadeToBlackBy(leds12, NUM_LEDS, 10);
-      delay(10);
+      delay(5);
       FastLED.show();
     }
   }
@@ -1339,7 +1334,7 @@ void cascade(){
 
 void galaxy(){
   uint8_t indexgal = 255;
-  for (int y = 0; y < 200; y++){
+  for (int y = 0; y < 100; y++){
     for (int i = 0; i < NUM_LEDS; i++){
         leds[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
         leds2[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
