@@ -417,7 +417,16 @@ DEFINE_GRADIENT_PALETTE( bhw3_63_gp ) {
   232, 249,168,219,
   255, 255,255,255};
 
-
+DEFINE_GRADIENT_PALETTE( bhw1_14_gp ) {
+    0,   0,  0,  0,
+   12,   1,  1,  3,
+   53,   8,  1, 22,
+   80,   4,  6, 89,
+  119,   2, 25,216,
+  145,   7, 10, 99,
+  186,  15,  2, 31,
+  233,   2,  1,  5,
+  255,   0,  0,  0};
 
 // Palette initialization
 CRGBPalette16 myPal1 = heatmap_gp;
@@ -442,6 +451,8 @@ CRGBPalette16 myPal19 = bhw2_sherbet2_gp;
 CRGBPalette16 myPal20 = bhw2_grrrrr_gp;
 CRGBPalette16 myPal21 = wiki_ice_greenland_gp;
 
+
+CRGBPalette16 galaxyPal2 = bhw1_14_gp;
 // Palette array
 CRGBPalette16 palletes[] = {myPal20,myPal7,myPal3,myPal14,myPal6,myPal15,myPal1,myPal11,myPal18,myPal2,myPal9, myPal19, myPal4, myPal17, myPal10, myPal5, myPal16, myPal8, myPal12, myPal21};
 
@@ -486,6 +497,7 @@ void setup() {
 
 void loop() {
   //scale.set_scale(calibration_factor); //Adjust to this calibration factor
+  scale.set_scale(calibration_factor);
   float force = scale.get_units();
   Serial.println("OKAY");
   Serial.println(force);
@@ -520,6 +532,9 @@ void loop() {
     FastLED.show();
     // Cue different passive patterns
       while ((force < -10) & (force > -60)){
+        Serial.println("standing");
+        Serial.println(force);
+        Serial.println("\n");
         EVERY_N_MILLISECONDS(1500){
           patternMode = rand()%20;
           for(uint8_t i = 0; i < NUM_LEDS; i++) {
@@ -538,42 +553,55 @@ void loop() {
           }
           FastLED.show();
         }
-    force =  scale.get_units();}
+    force =  scale.get_units();
+    scale.tare();}
   }
 
   if (force < -60){
+    Serial.println("JUMP");
+    Serial.println(force);
+    Serial.println("\n");
     switch (patternCounter){
       case 0:
         //randomFlickering();
-        downwardMovement();
+        //rainbowDot();
+        sineWave();
         break;
       case 1:
-        towersPulsing();
+        //galaxy();
+        sineWave();
         break;
-      case 2:
-        upwardMovement();
+      /*case 2:
+        cascade();
         break;
       case 3:
-        dotMoving();
+        towersPulsingPalette();
         break;
       case 4:
-        shiftingColoursUp();
+        towersPulsing();
         break;
       case 5:
-        randomFlickering();;
+        randomFlickering();
         break;
       case 6:
         sineWave();
         break;
       case 7:
-        shiftingColoursDown();
+        dotMoving();
         break;
-
+      case 8:
+        downwardMovement();
+        break;
+      case 9:
+        upwardMovement();
+        break;
+      */
       //case 2: 
       //  lightsFlickering();
       //  break;
     }force = scale.get_units();
     nextPattern();
+    scale.tare();
   }
 
   EVERY_N_MILLISECONDS(18000){
@@ -787,7 +815,7 @@ uint8_t qsawPos9 = map(255 - beat8(speed_array[speed_index],  4000 + spacing * 0
 
 /// Patterns
 void nextPattern() {
-  patternCounter = (patternCounter + 1) % 8;          // Change the number after the % to the number of patterns you have
+  patternCounter = (patternCounter + 1) % 2;          // Change the number after the % to the number of patterns you have
 }
 void upwardMovement(){
     patternMode = rand()%20;
@@ -1246,7 +1274,157 @@ void towersPulsingPalette(){
   }
 }
 
- 
+void cascade(){
+    fill_solid(leds, 99,CRGB(200,100,20));
+    fill_solid(leds2, 99,CRGB(200,100,20));
+    fill_solid(leds3, 99,CRGB(200,100,20));
+    fill_solid(leds4, 99,CRGB(200,100,20));
+    fill_solid(leds5, 99,CRGB(200,100,20));
+    fill_solid(leds6, 99,CRGB(200,100,20));
+    fill_solid(leds7, 99,CRGB(200,100,20));
+    fill_solid(leds8, 99,CRGB(200,100,20));
+    fill_solid(leds9, 99,CRGB(200,100,20));
+    fill_solid(leds10, 99,CRGB(200,100,20));
+    fill_solid(leds11, 99,CRGB(200,100,20));
+    fill_solid(leds12, 99,CRGB(200,100,20));
+    CRGB wave_colour = CRGB(245,80,50);
+    for (int i = 0; i < 300; i++){
+    //fill_solid(leds, NUM_LEDS, CRGB(0,40,40));
+    //fill_solid(leds2, NUM_LEDS, CRGB(0,40,40));
+      uint16_t sinBeat = beatsin16(10, 0, NUM_LEDS - 1, 0, 0);
+      if ((constrain(sinBeat+2,0,99) == 99) || (constrain(sinBeat,0,99) == 0)){
+        wave_colour = CRGB(100,2,10);
+      }
+
+      leds[constrain(sinBeat,0,99)] = wave_colour;
+      leds[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds2[constrain(sinBeat,0,99)] = wave_colour;
+      leds2[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds2[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds3[constrain(sinBeat,0,99)] = wave_colour;
+      leds3[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds3[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds4[constrain(sinBeat,0,99)] = wave_colour;
+      leds4[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds4[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds5[constrain(sinBeat,0,99)] = wave_colour;
+      leds5[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds5[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds6[constrain(sinBeat,0,99)] = wave_colour;
+      leds6[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds6[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds7[constrain(sinBeat,0,99)] = wave_colour;
+      leds7[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds7[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds8[constrain(sinBeat,0,99)] = wave_colour;
+      leds8[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds8[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds9[constrain(sinBeat,0,99)] = wave_colour;
+      leds9[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds9[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds10[constrain(sinBeat,0,99)] = wave_colour;
+      leds10[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds10[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds11[constrain(sinBeat,0,99)] = wave_colour;
+      leds11[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds11[constrain(sinBeat+2,0,99)] = wave_colour;
+      leds12[constrain(sinBeat,0,99)] = wave_colour;
+      leds12[constrain(sinBeat+1,0,99)] = wave_colour;
+      leds12[constrain(sinBeat+2,0,99)] = wave_colour;
+      delay(20);
+      FastLED.show();
+  }
+}
+
+void galaxy(){
+  uint8_t indexgal = 255;
+  for (int y = 0; y < 200; y++){
+    for (int i = 0; i < NUM_LEDS; i++){
+        leds[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds2[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+        leds3[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds4[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+        leds5[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds6[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+        leds7[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds8[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+        leds9[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds10[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+        leds11[i] = ColorFromPalette(galaxyPal2,indexgal-i); //constrain(255-i,180,255));
+        leds12[i] = ColorFromPalette(galaxyPal2, indexgal-i); //constrain(255-i,180,255));
+    }
+    for (int x = 0; x < 20; x++){
+      int random_int =  random(0,99);
+      leds[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds2[random_int]= CRGB::FairyLight;
+      leds3[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds4[random_int]= CRGB::FairyLight;
+      leds5[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds6[random_int]= CRGB::FairyLight;
+      leds7[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds8[random_int]= CRGB::FairyLight;
+      leds9[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds10[random_int]= CRGB::FairyLight;
+      leds11[random_int] = CRGB::FairyLight; //constrain(255-i,180,255));
+      leds12[random_int]= CRGB::FairyLight;
+      //fadeToBlackBy(leds, NUM_LEDS, 1);
+      //fadeToBlackBy(leds2, NUM_LEDS, 1);
+    }
+    delay(40);
+    FastLED.show();
+
+  }
+}
+
+void rainbowDot(){
+  fill_rainbow(leds,NUM_LEDS,5);
+  fill_rainbow(leds2,NUM_LEDS,5);
+  fill_rainbow(leds3,NUM_LEDS,5);
+  fill_rainbow(leds4,NUM_LEDS,5);
+  fill_rainbow(leds5,NUM_LEDS,5);
+  fill_rainbow(leds6,NUM_LEDS,5);
+  fill_rainbow(leds7,NUM_LEDS,5);
+  fill_rainbow(leds8,NUM_LEDS,5);
+  fill_rainbow(leds9,NUM_LEDS,5);
+  fill_rainbow(leds10,NUM_LEDS,5);
+  fill_rainbow(leds11,NUM_LEDS,5);
+  fill_rainbow(leds12,NUM_LEDS,5);
+  for (int y = 0; y < NUM_LEDS*3; y++){
+    uint8_t psawPos = map(255 - beat8(speed_array[4], 0), 0, 255, 0, NUM_LEDS - 1);
+    uint8_t osawPos = map(255 - beat8(speed_array[4], 0), 0, 255, 0, NUM_LEDS - 1);
+    for (int i = 0; i < NUM_LEDS; i++){
+      leds[psawPos]   = CRGB(245,245,245);
+      leds2[osawPos]   = CRGB(245,245,245);
+      leds3[psawPos]   = CRGB(245,245,245);
+      leds4[osawPos]   = CRGB(245,245,245);
+      leds5[psawPos]   = CRGB(245,245,245);
+      leds6[osawPos]   = CRGB(245,245,245);
+      leds7[psawPos]   = CRGB(245,245,245);
+      leds8[osawPos]   = CRGB(245,245,245);
+      leds9[psawPos]   = CRGB(245,245,245);
+      leds10[osawPos]   = CRGB(245,245,245);
+      leds11[psawPos]   = CRGB(245,245,245);
+      leds12[osawPos]   = CRGB(245,245,245);
+    }
+    delay(10);
+    FastLED.show();
+    fill_rainbow(leds,NUM_LEDS,5);
+    fill_rainbow(leds2,NUM_LEDS,5);
+    fill_rainbow(leds3,NUM_LEDS,5);
+    fill_rainbow(leds4,NUM_LEDS,5);
+    fill_rainbow(leds5,NUM_LEDS,5);
+    fill_rainbow(leds6,NUM_LEDS,5);
+    fill_rainbow(leds7,NUM_LEDS,5);
+    fill_rainbow(leds8,NUM_LEDS,5);
+    fill_rainbow(leds9,NUM_LEDS,5);
+    fill_rainbow(leds10,NUM_LEDS,5);
+    fill_rainbow(leds11,NUM_LEDS,5);
+    fill_rainbow(leds12,NUM_LEDS,5);
+    delay(2);
+    FastLED.show();
+  }
+}
 // Passive patterns
 //void lightsFlickering(){
 //  leds1
